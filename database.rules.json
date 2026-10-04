@@ -1,0 +1,96 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+
+    "users": {
+      ".read": "auth != null",
+      "$uid": {
+        ".write": "auth != null && auth.uid === $uid",
+        "displayName": { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 40" },
+        "avatarUrl": { ".validate": "newData.isString() && newData.val().length <= 500" },
+        "email": { ".validate": "newData.isString() && newData.val().length <= 200" },
+        ".validate": "newData.hasChildren(['displayName'])"
+      }
+    },
+
+    "conversations": {
+      "$conversationId": {
+        ".read": "auth != null && data.child('memberIds').child(auth.uid).val() === true",
+        ".write": "auth != null && !data.exists() && newData.child('createdBy').val() === auth.uid",
+
+        "title": {
+          ".write": "auth != null && (newData.child('memberIds').child(auth.uid).val() === true || data.child('memberIds').child(auth.uid).val() === true)",
+          ".validate": "newData.isString() && newData.val().length <= 80"
+        },
+        "memberIds": {
+          "$uid": {
+            ".write": "auth != null && auth.uid === $uid && !data.exists() && newData.val() === true"
+          }
+        },
+        "memberNames": {
+          ".write": "auth != null && data.child('memberIds').child(auth.uid).val() === true"
+        },
+
+        "lastMessageText": { ".write": "auth != null && data.child('memberIds').child(auth.uid).val() === true", ".validate": "newData.isString() && newData.val().length <= 5000" },
+        "lastSenderId": { ".write": "auth != null && data.child('memberIds').child(auth.uid).val() === true" },
+        "lastMessageAt": { ".write": "auth != null && data.child('memberIds').child(auth.uid).val() === true", ".validate": "newData.isNumber()" },
+        "updatedAt": { ".write": "auth != null && data.child('memberIds').child(auth.uid).val() === true" },
+
+        "messages": {
+          "$messageId": {
+            ".read": "auth != null && root.child('conversations').child($conversationId).child('memberIds').child(auth.uid).val() === true",
+            ".write": "auth != null && root.child('conversations').child($conversationId).child('memberIds').child(auth.uid).val() === true",
+            ".validate": "newData.hasChildren(['senderId','text','createdAt']) && newData.child('senderId').val() === auth.uid",
+            "senderId": { ".validate": "newData.val() === auth.uid" },
+            "text": { ".validate": "newData.isString() && newData.val().length <= 5000" },
+            "type": { ".validate": "newData.isString()" },
+            "createdAt": { ".validate": "newData.isNumber()" },
+            "editedAt": { ".validate": "newData.isNumber()" },
+            "deleted": { ".validate": "newData.isBoolean()" }
+          }
+        }
+      }
+    },
+
+    "userConversations": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        "$conversationId": {
+          ".write": "auth != null && root.child('conversations').child($conversationId).child('memberIds').child(auth.uid).val() === true",
+          ".validate": "newData.hasChildren(['id','memberIds'])",
+          "lastReadAt": {
+            ".write": "auth != null && auth.uid === $uid",
+            ".validate": "newData.isNumber()"
+          }
+        }
+      }
+    },
+
+    "presence": {
+      "$uid": {
+        ".read": "auth != null",
+        ".write": "auth != null && auth.uid === $uid",
+        ".validate": "newData.hasChildren(['state']) && (newData.child('state').val() === 'online' || newData.child('state').val() === 'offline')"
+      }
+    },
+
+    "typing": {
+      "$conversationId": {
+        ".read": "auth != null && root.child('conversations').child($conversationId).child('memberIds').child(auth.uid).val() === true",
+        "$uid": {
+          ".write": "auth != null && auth.uid === $uid && root.child('conversations').child($conversationId).child('memberIds').child(auth.uid).val() === true",
+          ".validate": "!newData.exists() || newData.val() === true"
+        }
+      }
+    },
+
+    "fcmTokens": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid",
+        ".validate": "newData.hasChildren(['token'])"
+      }
+    }
+  }
+}
