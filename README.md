@@ -115,6 +115,23 @@ statt einem pro Konversation, und die Security Rules können pro Nutzer filtern.
 Zum Testen auf **einem** Gerät einfach zwei Konten in derselben App anlegen
 (dafür E-Mail/Passwort statt Google-Login).
 
+## Troubleshooting CI
+
+**`Failed to find package 'tools'`** – kommt von `android-actions/setup-android`.
+Die Action will das Legacy-SDK-Tools-Paket installieren, das Google aus dem
+Repository entfernt hat. Der Workflow umgeht die Action deshalb und installiert
+`platforms;android-36` + `build-tools;36.0.0` direkt über das auf dem Runner
+vorhandene `sdkmanager`. Falls `sdkmanager` fehlt, im Workflow-Pfad
+`${ANDROID_HOME}/cmdline-tools/*/bin/sdkmanager` prüfen.
+
+**`Dependency 'X' requires compile against version 37 or later`** – eine neue
+Bibliothek braucht ein neueres `compileSdk`. Dann in `app/build.gradle.kts`
+`compileSdk` auf 37 setzen und im Workflow `platforms;android-37` installieren.
+
+**`was compiled with an incompatible version of Kotlin`** – Kotlin-Version passt
+nicht zur Bibliothek. `kotlin` in `gradle/libs.versions.toml` und im Root-
+`build.gradle.kts` (Buildscript-Classpath) gemeinsam anheben.
+
 ## Bekannte Grenzen (v1)
 
 - Ungelesen-Zähler ist nur ein Punkt (kein Zähler pro Nachricht); für echte Zähler

@@ -28,8 +28,29 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Android SDK
-        uses: android-actions/setup-android@v3
+      # KEIN android-actions/setup-android: die Action versucht das Legacy-Paket
+      # "tools" zu installieren, das Google aus dem Repository entfernt hat
+      # ("Failed to find package 'tools'"). Der Runner hat das SDK schon dabei –
+      # deshalb installieren wir hier direkt die benoetigten Pakete.
+      - name: Android SDK einrichten
+        run: |
+          set -euo pipefail
+
+          SDKMANAGER="$(command -v sdkmanager || true)"
+          if [ -z "$SDKMANAGER" ] || [ ! -x "$SDKMANAGER" ]; then
+            SDKMANAGER="$(ls -d "${ANDROID_HOME}"/cmdline-tools/*/bin/sdkmanager 2>/dev/null | head -1 || true)"
+          fi
+          if [ -z "$SDKMANAGER" ]; then
+            echo "::error::sdkmanager nicht gefunden – Runner-Image pruefen"
+            exit 1
+          fi
+          echo "Verwendetes sdkmanager: $SDKMANAGER"
+
+          yes | "$SDKMANAGER" --licenses > /dev/null 2>&1 || true
+          "$SDKMANAGER" --install "platform-tools" "platforms;android-36" "build-tools;36.0.0"
+
+          echo "sdk.dir=${ANDROID_HOME}" > local.properties
+          "$SDKMANAGER" --list_installed
 
       - name: Gradle
         uses: gradle/actions/setup-gradle@v4
