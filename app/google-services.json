@@ -1,21 +1,21 @@
 {
   "project_info": {
-    "project_number": "000000000000",
-    "project_id": "chatt-placeholder",
-    "storage_bucket": "chatt-placeholder.appspot.com"
+    "project_number": "971164710959",
+    "project_id": "chat-dabcd",
+    "storage_bucket": "chat-dabcd.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:000000000000:android:0000000000000000000000",
+        "mobilesdk_app_id": "1:971164710959:android:ecaad54635f92cc379aeda",
         "android_client_info": {
-          "package_name": "dev.and.chatt"
+          "package_name": "com.mini.privchat"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyPLACEHOLDER0000000000000000000000000"
+          "current_key": "AIzaSyBV9Z9BiNCVm0z1H0U_fQydcrXU6uth_eg"
         }
       ],
       "services": {
